@@ -87,7 +87,8 @@ class UserController extends AbstractController
     )
     {
         $user = $serializer->deserialize($request->getContent(), User::class, "json");
-        $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
+        $user->setPassword($hasher->hashPassword($user, $user->getPassword()))
+            ->setCreatedAt(new \DateTimeImmutable());
 
         $em->persist($user);
         $em->flush();
