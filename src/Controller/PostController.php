@@ -79,4 +79,39 @@ class PostController extends AbstractController
 
         return $this->json($post, Response::HTTP_CREATED, [], ["groups" => "post:read"]);
     }
+
+    #[Route("/posts/{id}", methods: ['DELETE'])]
+    public function deletePost(
+        Post                   $post,
+        PostRepository         $postRepository,
+        SerializerInterface    $serializer,
+        Request                $request,
+        SessionRepository      $sessionRepository,
+        EntityManagerInterface $em
+    )
+    {
+        $sessionCookie = str_replace("sessionId=", "", $request->headers->get("cookie"));
+
+        if (!$sessionCookie) {
+
+            return new JsonResponse('accès refusé', 401);
+        }
+
+        $session = $sessionRepository->findOneBy(["session" => $sessionCookie]);
+
+        if (!$session) {
+            return new JsonResponse('accès refusé', 401);
+        }
+
+        $user = $session->getUser();
+
+        if ($user !== $post->getUser()) {
+            return $this->json(["message" => "Accès refusé"], Response::HTTP_FORBIDDEN);
+        }
+
+        $em->remove($post);
+        $em->flush();
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
 }
