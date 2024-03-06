@@ -17,10 +17,6 @@ class Post
 
     #[ORM\Column(length: 255)]
     #[Groups(["post:read"])]
-    private ?string $title = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(["post:read"])]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
