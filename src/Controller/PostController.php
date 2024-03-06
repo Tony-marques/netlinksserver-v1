@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\User;
 use App\Repository\PostRepository;
 use App\Repository\SessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,8 +27,6 @@ class PostController extends AbstractController
         $sessionCookie = str_replace("sessionId=", "", $request->headers->get("cookie"));
 
         if (!$sessionCookie) {
-//            $jsonResponse = new JsonResponse('accès refusé', 401);
-//            $jsonResponse->headers->clearCookie('sessionId', '/', null, true, true);
             return new JsonResponse('accès refusé', 401);
         }
 
@@ -113,5 +112,13 @@ class PostController extends AbstractController
         $em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route(path: "/posts/user/{id}")]
+    public function getPostsForOneUser(PostRepository $postRepository, User $user, SerializerInterface $serializer)
+    {
+        $posts = $serializer->serialize($user->getPosts(), "json", ['groups' => "post:read"]);
+
+        return new JsonResponse($posts, 200, [], true);
     }
 }
